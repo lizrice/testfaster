@@ -31,8 +31,8 @@ base:
     - k8s.gcr.io/pause:3.2
     - quay.io/cilium/cilium:v1.9.8
     - quay.io/cilium/hubble-relay:v1.9.8
-    - quay.io/cilium/hubble-ui-backend
-    - quay.io/cilium/hubble-ui
+    # - quay.io/cilium/hubble-ui-backend
+    # - quay.io/cilium/hubble-ui
     - quay.io/cilium/operator-generic:v1.9.8
   prewarm_script: |-
     # This gets run after each individual VM starts up, so
