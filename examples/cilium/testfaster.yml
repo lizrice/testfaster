@@ -59,3 +59,15 @@ max_pool_size: 2
 # the VMs for long running development purposes rather than
 # short-lived CI.
 default_lease_timeout: 1h
+
+# share this config with the world!
+shared: true
+
+launch:
+  title: Cilium
+  buttons:
+    - title: Hubble UI
+      port: 31380
+  homepage: |
+    ## Follow the tutorial below
+    This is where instructions could go
