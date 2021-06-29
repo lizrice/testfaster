@@ -27,13 +27,37 @@ base:
     #!/bin/bash
     set -euo pipefail
     minikube start --driver=none --network-plugin=cni --kubernetes-version=v1.18.3
+
+    # Copy the docker credentials, if present, into kubernetes, so for example
+    # we can avoid docker hub rate limits.
+    if [ -f "/root/.docker/config.json" ]; then
+        kubectl create secret generic regcred --from-file=.dockerconfigjson=/root/.docker/config.json --type=kubernetes.io/dockerconfigjson
+        kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "regcred"}]}'
+    fi
+    wget -q -O /usr/local/bin/agent https://storage.googleapis.com/get-faster-ci/agent-0.0.5
+    chmod +x /usr/local/bin/agent
+    cat << EOF > /etc/systemd/system/testfaster-agent.service
+    [Unit]
+    Description=Testfaster guest agent
+    [Service]
+    User=root
+    WorkingDirectory=/root
+    ExecStart=/usr/local/bin/agent
+    Restart=always
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    systemctl daemon-reload
+    systemctl start testfaster-agent
+
     cilium install 
+    cilium hubble enable --ui 
     echo "apiVersion: v1
     kind: Service
     metadata:
       labels:
         k8s-app: hubble-ui
-      name: hubble-ui
+      name: hubble-ui-node-port
       namespace: kube-system
     spec:
       ports:
@@ -52,9 +76,9 @@ runtime:
   memory: 8GB
   disk: 50GB
 # How many ready VMs to keep running for instant testctl get
-prewarm_pool_size: 1
+prewarm_pool_size: 4
 # Upper bound for pool size, e.g. to keep memory usage sensible
-max_pool_size: 2
+max_pool_size: 8
 # Timeout VMs after this long. Set to "" if you want to use
 # the VMs for long running development purposes rather than
 # short-lived CI.
