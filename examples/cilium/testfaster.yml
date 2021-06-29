@@ -19,7 +19,21 @@ base:
   preload_docker_images:
     # You can also pull docker images like this. Always use
     # immutable tags for reproducibility!
-    - nginx:1.19.5
+    - docker.io/envoyproxy/envoy:v1.18.2@sha256:e8b37c1d75787dd1e712ff389b0d37337dc8a174a63bed9c34ba73359dc67da7
+    - busybox:1.32.0
+    - gcr.io/k8s-minikube/storage-provisioner:v1.8.1
+    - k8s.gcr.io/coredns:1.6.7
+    - k8s.gcr.io/etcd:3.4.3-0
+    - k8s.gcr.io/kube-apiserver:v1.18.3
+    - k8s.gcr.io/kube-controller-manager:v1.18.3
+    - k8s.gcr.io/kube-proxy:v1.18.3
+    - k8s.gcr.io/kube-scheduler:v1.18.3
+    - k8s.gcr.io/pause:3.2
+    - quay.io/cilium/cilium:v1.9.8
+    - quay.io/cilium/hubble-relay:v1.9.8
+    - quay.io/cilium/hubble-ui-backend
+    - quay.io/cilium/hubble-ui
+    - quay.io/cilium/operator-generic:v1.9.8
   prewarm_script: |-
     # This gets run after each individual VM starts up, so
     # start services you need in your tests here and they'll be
@@ -51,6 +65,7 @@ base:
     systemctl start testfaster-agent
 
     cilium install 
+    cilium hubble enable
     cilium hubble enable --ui 
     echo "apiVersion: v1
     kind: Service
